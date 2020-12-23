@@ -28,7 +28,7 @@ def main():
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('sheets', 'v4', credentials=creds)
+    service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
 
     # Call the Sheets API
     sheet = service.spreadsheets()
@@ -42,4 +42,9 @@ def main():
 main()
 
 df=pd.DataFrame(values_input[1:], columns=values_input[0])
-st.write(df)
+
+if st.button('Voc'):
+    st.write(df['Voc'])
+
+if st.button('Verbes'):
+    st.write(df['Verbes'])
