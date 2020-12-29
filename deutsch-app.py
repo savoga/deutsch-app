@@ -1,6 +1,6 @@
 import pandas as pd
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow,Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import os
 import pickle
@@ -11,8 +11,10 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 # here enter the id of your google sheet
 SAMPLE_SPREADSHEET_ID_input = '1lMkLiPKYXT1qCDeLK1qRDF3yPMkCWJtHrJ1LTsHhlgA'
 SAMPLE_RANGE_NAME = 'A1:AA1000'
+COLUMN_VOC = 'Voc'
+COLUMN_TRANSLATION_VOC = 'Traduction voc'
 
-def main():
+def loadSpreadsheet():
     global values_input, service
     creds = None
     if os.path.exists('token.pickle'):
@@ -39,12 +41,26 @@ def main():
     if not values_input:
         print('No data found.')
 
-main()
+def randomWord(column_name):
+    translation = None
+    while(not translation or translation==''):
+        random_word = df_data[column_name].sample(n=1).values[0]
+        translation = df_data[df_data[column_name]==random_word]['Traduction ' + column_name.lower()].values[0]
+    return random_word, translation
 
-df=pd.DataFrame(values_input[1:], columns=values_input[0])
+def isCorrect(user_answer, correct_answer):
+    if user_answer==correct_answer:
+        st.write('Correct!')
+    else:
+        st.write('Wrong!')
 
-if st.button('Voc'):
-    st.write(df['Voc'])
+loadSpreadsheet()
+df_data = pd.DataFrame(values_input[1:], columns=values_input[0])
+user_input = None
 
-if st.button('Verbes'):
-    st.write(df['Verbes'])
+if st.button(COLUMN_VOC):
+    random_word, translation = randomWord(COLUMN_VOC)
+    st.write(random_word)
+    user_input = st.text_input("Your answer")
+if user_input:
+    isCorrect(user_input, translation)
